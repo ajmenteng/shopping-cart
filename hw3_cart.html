@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang='en' ng-app>
+  <head>
+   <title>Book Shopping Cart</title>
+
+  <script src="js/angular10.js"></script>
+  <script>
+    function CartControler($scope) {
+
+      //This is the initial function that will be called right after the application is loaded
+      //It will check first if there is any previous data saved in the LocalStorage
+      //If yes, then the data will be loaded. Otherwise it will create a default set of selection
+      $scope.init = function(){
+        if(localStorage.getItem("chandra_cart")===null){
+          $scope.books = [
+            {title: 'Absolute Java',    
+                qty: 1, price: 114.95},
+            {title: 'Pro HTML5',        
+                qty: 1, price: 27.95},
+            {title: 'Head First HTML5', 
+                qty: 1, price: 27.89}
+          ];
+        }
+        else{
+          $scope.books = JSON.parse(localStorage.chandra_cart);
+        }
+        $scope.updateBookCount();
+      }
+
+      
+      //Function to remove book from the table
+      $scope.removeBook = function(index) {
+        $scope.books.splice(index, 1);
+        $scope.getTotal();
+      }
+      
+      //Function to update the number of book
+      $scope.count = 0;
+      $scope.updateBookCount = function() {
+          $scope.count = $scope.books.length;
+          $scope.getTotal();
+      }
+      
+      $scope.$watch('books', function() {
+          $scope.updateBookCount();
+      }, true)
+
+      //Function to calculate the total price of all selected books
+      $scope.getTotal = function(){
+          $scope.total = 0;
+          for(var i=0; i < $scope.books.length; i++){
+            $scope.total = $scope.total + ($scope.books[i].qty * $scope.books[i].price);
+          }
+      }
+
+      //Function to add a new book with default values
+      $scope.addBook = function(){
+        var newBook = new function(){
+          this.title = "New Book";
+          this.qty = 1;
+          this.price = 10.99;
+        }
+        $scope.books.push(newBook);
+      }
+
+      //Function to save the existing items to the LocalStorage
+      $scope.saveBooks = function(){
+        localStorage.setItem("chandra_cart",JSON.stringify($scope.books));
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="css/styles.css">
+  </head>
+
+  <body ng-controller="CartControler" ng-init="init()">
+
+    <table>
+      <caption><b>My Books</b></caption>
+      <thead>
+        <tr>
+            <th>Title</th>
+            <th>Qty</th>
+            <th>UnitPrice</th>
+            <th>Line Total</th>
+            <th>Total {{total | currency}}</th>
+        </tr>
+      </thead>
+      <tfoot>
+        <tr>
+            <th>
+                <button ng-click="addBook()">
+                  New
+                </button>
+            </th>
+            <th></th>
+            <th></th>
+            <th>
+                <button ng-click="saveBooks()">
+                  Save
+                </button>
+            </th>
+            <th></th>
+        </tr>
+      </tfoot>
+      <tbody ng-repeat="book in books">
+        <tr>
+            <td>
+                <input ng-model="book.title">
+            </td>
+            <td>
+                <input ng-model="book.qty" size="2">
+            </td>
+            <td>
+                <input ng-model="book.price" size="5">
+            </td>
+            <td>{{book.price * book.qty | currency}}</td>
+            <td>
+                <button ng-click="removeBook($index)">
+                    Remove
+                </button>
+            </td>
+        </tr>
+      </tbody>
+    </table>
+    <b>Book Count : {{count}}</b>
+  </body>
+</html>
